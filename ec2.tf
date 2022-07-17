@@ -16,8 +16,8 @@ data "aws_ami" "ubuntu" {
 
 resource "aws_instance" "bastion" {
   ami           = data.aws_ami.ubuntu.id
-  instance_type = "t2.micro"
-  subnet_id = aws_subnet.lab1-public-subnet1.id
+  instance_type = var.instance_type 
+  subnet_id = module.network.public_subnet1_id
   vpc_security_group_ids = [aws_security_group.allow_ssh.id]
   key_name = aws_key_pair.my-private-key.key_name
   associate_public_ip_address = true
@@ -25,12 +25,16 @@ resource "aws_instance" "bastion" {
   tags = {
     Name = "bastion"
   }
+
+  provisioner "local-exec" {
+    command = "echo ${self.public_ip}"
+  }
 }
 
 resource "aws_instance" "application" {
   ami           = data.aws_ami.ubuntu.id
-  instance_type = "t2.micro"
-  subnet_id = aws_subnet.lab1-private-subnet1.id
+  instance_type = var.instance_type 
+  subnet_id = module.network.private_subnet1_id
   vpc_security_group_ids = [aws_security_group.allow_ssh_and_open3000.id]
   key_name = aws_key_pair.my-private-key.key_name
   tags = {
