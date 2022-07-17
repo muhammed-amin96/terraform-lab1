@@ -55,3 +55,26 @@ resource "aws_security_group" "allow_ssh_and_open3000" {
     Name = "allow_ssh_and_open3000"
   }
 }
+
+resource "aws_security_group" "rds_sg" {
+  name        = "rds_sg"
+  description = "open port 3306 for rds"
+  vpc_id      = module.network.vpc_id
+  # Keep the instance private by only allowing traffic from the web server.
+  ingress {
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
+    cidr_blocks      = [var.vpc_cidr]
+  }
+  # Allow all outbound traffic.
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags =  {
+    Name = "rds_sg"
+  }
+}
